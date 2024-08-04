@@ -6,6 +6,7 @@ import PostEntity from './post.entity';
 import { UpdatePostDto } from './dto/updatePost.dto';
 import { CreatePostDto } from './dto/createPost.dto';
 import PostNotFoundException from './exceptions/postNotFound.exception';
+import User from 'src/users/user.entity';
 
 @Injectable()
 export default class PostsService {
@@ -17,30 +18,39 @@ export default class PostsService {
   }
 
   getAllPosts() {
-    return this.postsRepository.find();
+    return this.postsRepository.find({ relations: ['author'] });
   }
 
   async getPostById(id: number) {
-    const post = await this.postsRepository.findOneBy({id});
+    const post = await this.postsRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
     if (post) {
       return post;
     }
     throw new PostNotFoundException(id);
   }
 
-    async createPost(post: CreatePostDto) {
-      const newPost = await this.postsRepository.create(post);
-      await this.postsRepository.save(newPost);
-      return newPost;
-    }
+  async createPost(post: CreatePostDto, user: User) {
+    const newPost = await this.postsRepository.create({
+      ...post,
+      author: user
+    });
+    await this.postsRepository.save(newPost);
+    return newPost;
+  }
 
   async updatePost(id: number, post: UpdatePostDto) {
-    const foundPost = await this.postsRepository.findOneBy({ id });
+    const foundPost = await this.postsRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
     if (!foundPost) {
       throw new PostNotFoundException(id);
     }
     await this.postsRepository.update(id, post);
-    return this.postsRepository.findOneByOrFail({ id });
+    return this.postsRepository.findOne({ where: { id }, relations: ['author'] });
   }
   
   async deletePost(id: number) {
