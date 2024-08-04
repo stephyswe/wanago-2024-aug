@@ -34,3 +34,34 @@ CREATE TABLE public.post
  ```
 
 npm run start:dev
+
+### 10. API with NestJS #10. Uploading public files to Amazon S3
+
+AWS IAM
+
+https://us-east-1.console.aws.amazon.com/iam/home#/users
+
+> create user
+```
+username: s3-manager
+permissions: attach policies directly - amazons3fullaccess    
+```
+view user - create access key 
+
+```
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+```
+
+AWS S3 Bucket
+https://us-east-1.console.aws.amazon.com/s3/home?region=us-east-1
+
+> create bucket
+```
+nestjs-series-public-bucket (add own prefix)
+region: EU frankfurt
+> remove 'block all public access'
+```
+
+Go to Permissions > Object Ownership > select ACL’s enabled > and select Bucket owner preferred
