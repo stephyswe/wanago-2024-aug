@@ -10,7 +10,8 @@ const mockedUser: User = {
     street: 'streetName',
     city: 'cityName',
     country: 'countryName'
-  }
+  },
+  files: []
 }
 
 export default mockedUser;
