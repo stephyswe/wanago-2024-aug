@@ -2,12 +2,18 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nes
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import recursivelyStripNullValues from './recursivelyStripNullValues';
+import { Stream } from 'stream';
 
 @Injectable()
 export class ExcludeNullInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next
       .handle()
-      .pipe(map(value => recursivelyStripNullValues(value)));
+      .pipe(map(value => {
+        if (value instanceof Stream) {
+          return value;
+        }
+        return recursivelyStripNullValues(value);
+      }));
   }
 }
