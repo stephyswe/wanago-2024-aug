@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import PostEntity from './post.entity';
 import User from '../users/user.entity';
 import { UpdatePostDto } from './dto/updatePost.dto';
 import { CreatePostDto } from './dto/createPost.dto';
 import PostNotFoundException from './exceptions/postNotFound.exception';
+import PostsSearchService from './postsSearch.service';
 
 @Injectable()
 export default class PostsService {
@@ -14,6 +15,7 @@ export default class PostsService {
   constructor(
     @InjectRepository(PostEntity)
     private postsRepository: Repository<PostEntity>,
+    private postsSearchService: PostsSearchService
   ) {
   }
 
@@ -38,6 +40,7 @@ export default class PostsService {
       author: user
     });
     await this.postsRepository.save(newPost);
+    this.postsSearchService.indexPost(newPost);
     return newPost;
   }
 
@@ -46,11 +49,16 @@ export default class PostsService {
       where: { id },
       relations: ['author'],
     });
+  
     if (!foundPost) {
       throw new PostNotFoundException(id);
     }
-    await this.postsRepository.update(id, post);
-    return this.postsRepository.findOne({ where: { id }, relations: ['author'] });
+  
+    // Update the found post with the new values
+    Object.assign(foundPost, post);
+  
+    await this.postsRepository.save(foundPost);
+    await this.postsSearchService.update(foundPost);
   }
   
   async deletePost(id: number) {
@@ -58,5 +66,17 @@ export default class PostsService {
     if (!deleteResponse.affected) {
       throw new PostNotFoundException(id);
     }
+  }
+
+  async searchForPosts(text: string) {
+    const results = await this.postsSearchService.search(text);
+    const ids = results.map(result => result.id);
+    if (!ids.length) {
+      return [];
+    }
+    return this.postsRepository
+      .find({
+        where: { id: In(ids) }
+      });
   }
 }

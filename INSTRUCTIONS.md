@@ -65,3 +65,7 @@ region: EU frankfurt
 ```
 
 Go to Permissions > Object Ownership > select ACL’s enabled > and select Bucket owner preferred
+
+### 12. Introduction to Elasticsearch
+
+https://medium.com/@tranquochuyqn93/elasticsearch-in-nestjs-87db1235cbfb
