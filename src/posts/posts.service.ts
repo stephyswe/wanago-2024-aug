@@ -35,12 +35,16 @@ export default class PostsService {
   }
 
   async createPost(post: CreatePostDto, user: User) {
-    const newPost = await this.postsRepository.create({
+    console.log('user info', user)
+    const newPost = this.postsRepository.create({
       ...post,
       author: user
     });
+
+    console.log('createPost', newPost)
+
     await this.postsRepository.save(newPost);
-    this.postsSearchService.indexPost(newPost);
+    await this.postsSearchService.indexPost(newPost);
     return newPost;
   }
 
