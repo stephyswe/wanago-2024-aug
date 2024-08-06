@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ClassSerializerInterceptor, Injectable, UseInterceptors } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
@@ -10,6 +10,7 @@ import PostNotFoundException from './exceptions/postNotFound.exception';
 import PostsSearchService from './postsSearch.service';
 
 @Injectable()
+@UseInterceptors(ClassSerializerInterceptor)
 export default class PostsService {
 
   constructor(
@@ -35,16 +36,12 @@ export default class PostsService {
   }
 
   async createPost(post: CreatePostDto, user: User) {
-    console.log('user info', user)
     const newPost = this.postsRepository.create({
       ...post,
       author: user
     });
-
-    console.log('createPost', newPost)
-
     await this.postsRepository.save(newPost);
-    await this.postsSearchService.indexPost(newPost);
+    this.postsSearchService.indexPost(newPost);
     return newPost;
   }
 

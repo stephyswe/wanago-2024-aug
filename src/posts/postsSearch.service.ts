@@ -13,19 +13,19 @@ export default class PostsSearchService {
   ) {}
 
   async indexPost(post: Post) {
-    return this.elasticsearchService.index<PostSearchBody>({
+    return this.elasticsearchService.index<PostSearchResult, PostSearchBody>({
       index: this.index,
       body: {
         id: post.id,
         title: post.title,
         paragraphs: post.paragraphs,
         authorId: post.author.id
-      },
+      }
     })
   }
 
   async search(text: string) {
-    const body = await this.elasticsearchService.search<PostSearchBody, PostSearchResult>({
+    const { body } = await this.elasticsearchService.search<PostSearchResult>({
       index: this.index,
       body: {
         query: {
@@ -74,7 +74,7 @@ export default class PostsSearchService {
           }
         },
         script: {
-          source: script,
+          inline: script
         }
       }
     })
