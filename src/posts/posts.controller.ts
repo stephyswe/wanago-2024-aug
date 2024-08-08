@@ -6,6 +6,7 @@ import { UpdatePostDto } from './dto/updatePost.dto';
 import FindOneParams from '../utils/FindOneParams';
 import RequestWithUser from '../authentication/requestWithUser.interface';
 import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
+import { PaginationParams } from '../utils/types/paginationParams';
  
 @Controller('posts')
 export default class PostsController {
@@ -14,11 +15,15 @@ export default class PostsController {
   ) {}
  
   @Get()
-  async getPosts(@Query('search') search: string) {
+  async getPosts(
+    @Query('search') search: string,
+    @Query() { offset, limit }: PaginationParams
+  ) {
     if (search) {
-      return this.postsService.searchForPosts(search);
+      return;
+      //return this.postsService.searchForPosts(search, offset, limit);
     }
-    return this.postsService.getAllPosts();
+    return this.postsService.getAllPosts(offset, limit);
   }
  
   @Get(':id')

@@ -1,6 +1,6 @@
 import { ClassSerializerInterceptor, Injectable, UseInterceptors } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { FindManyOptions, In, MoreThan, Repository } from 'typeorm';
 
 import PostEntity from './post.entity';
 import User from '../users/user.entity';
@@ -20,8 +20,28 @@ export default class PostsService {
   ) {
   }
 
-  getAllPosts() {
-    return this.postsRepository.find({ relations: ['author'] });
+  async getAllPosts(offset?: number, limit?: number, startId?: number) {
+    const where: FindManyOptions<PostEntity>['where'] = {};
+    let separateCount = 0;
+    if (startId) {
+      where.id = MoreThan(startId);
+      separateCount = await this.postsRepository.count();
+    }
+
+    const [items, count] = await this.postsRepository.findAndCount({
+      where,
+      relations: ['author'],
+      order: {
+        id: 'ASC'
+      },
+      skip: offset,
+      take: limit
+    });
+
+    return {
+      items,
+      count: startId ? separateCount : count
+    }
   }
 
   async getPostById(id: number) {
@@ -69,7 +89,7 @@ export default class PostsService {
     }
   }
 
-  async searchForPosts(text: string) {
+  /*async searchForPosts(text: string, offset?: number, limit?: number) {
     const results = await this.postsSearchService.search(text);
     const ids = results.map(result => result.id);
     if (!ids.length) {
@@ -79,5 +99,5 @@ export default class PostsService {
       .find({
         where: { id: In(ids) }
       });
-  }
+  }*/
 }
