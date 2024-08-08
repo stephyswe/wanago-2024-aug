@@ -41,7 +41,7 @@ export default class PostsService {
       author: user
     });
     await this.postsRepository.save(newPost);
-    this.postsSearchService.indexPost(newPost);
+    //this.postsSearchService.indexPost(newPost);
     return newPost;
   }
 
@@ -59,7 +59,7 @@ export default class PostsService {
     Object.assign(foundPost, post);
   
     await this.postsRepository.save(foundPost);
-    await this.postsSearchService.update(foundPost);
+    //await this.postsSearchService.update(foundPost);
   }
   
   async deletePost(id: number) {
